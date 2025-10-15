@@ -50,7 +50,7 @@ const isProduction = process.env.NODE_ENV === "production";
 // CORS setup for development only
 if (!isProduction) {
   const corsOptions = {
-    origin: "https://job-portal-mern-qpwd.onrender.com/",
+    origin: "https://job-portal-mern-qpwd.onrender.com",
     credentials: true,
   };
   app.use(cors(corsOptions));

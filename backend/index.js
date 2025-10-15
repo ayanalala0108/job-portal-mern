@@ -11,9 +11,11 @@ import companyRoute from "./routes/company.route.js";
 import jobRoute from "./routes/job.route.js";
 import applicationRoute from "./routes/application.route.js";
 
-// Load environment variables
-dotenv.config({});
+// ----------------- ENVIRONMENT VARIABLES ----------------- //
+// Only load variables you explicitly set in Render
+dotenv.config();
 
+// ----------------- EXPRESS APP ----------------- //
 const app = express();
 
 // Middleware
@@ -24,26 +26,22 @@ app.use(cookieParser());
 // Determine environment
 const isProduction = process.env.NODE_ENV === "production";
 
-// CORS setup for development
+// CORS setup for development only
 if (!isProduction) {
   const corsOptions = {
-    origin: "http://localhost:5173", // frontend dev server
+    origin: "http://localhost:5173",
     credentials: true,
   };
   app.use(cors(corsOptions));
 }
 
-// Connect to database
-connectDB();
-
-// ---------------- API ROUTES ---------------- //
+// ----------------- API ROUTES ----------------- //
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/company", companyRoute);
 app.use("/api/v1/job", jobRoute);
 app.use("/api/v1/application", applicationRoute);
 
-// ---------------- TEST ROUTE ---------------- //
-// Optional: quick test to check API
+// Test route
 app.get("/api/test", (req, res) => {
   res.json({ message: "API is running!" });
 });
@@ -53,7 +51,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 if (isProduction) {
-  // Serve static frontend files
   app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
   // Serve index.html for all unknown routes
@@ -66,8 +63,19 @@ if (isProduction) {
   });
 }
 
-// ----------------- START SERVER ----------------- //
+// ----------------- START SERVER AFTER DB CONNECT ----------------- //
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
-});
+
+const startServer = async () => {
+  try {
+    await connectDB(); // connect to MongoDB first
+    app.listen(PORT, () => {
+      console.log(`✅ Server running on port ${PORT}`);
+    });
+  } catch (err) {
+    console.error("❌ Failed to connect to DB:", err);
+    process.exit(1); // exit if DB connection fails
+  }
+};
+
+startServer();

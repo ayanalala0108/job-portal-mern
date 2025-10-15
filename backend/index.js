@@ -12,8 +12,24 @@ import jobRoute from "./routes/job.route.js";
 import applicationRoute from "./routes/application.route.js";
 
 // ----------------- ENVIRONMENT VARIABLES ----------------- //
-// Only load variables you explicitly set in Render
 dotenv.config();
+
+// Only keep app-specific env vars to avoid Render debug issues
+const allowedEnv = [
+  "PORT",
+  "MONGO_URI",
+  "SECRET_KEY",
+  "CLOUD_NAME",
+  "API_KEY",
+  "API_SECRET",
+  "NODE_ENV",
+];
+
+for (const key of Object.keys(process.env)) {
+  if (!allowedEnv.includes(key)) {
+    delete process.env[key];
+  }
+}
 
 // ----------------- EXPRESS APP ----------------- //
 const app = express();

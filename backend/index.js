@@ -14,7 +14,7 @@ import applicationRoute from "./routes/application.route.js";
 // ----------------- ENVIRONMENT VARIABLES ----------------- //
 dotenv.config();
 
-// Only keep app-specific env vars to avoid Render debug issues
+// Keep only safe, app-specific env variables to avoid Render debug issues
 const allowedEnv = [
   "PORT",
   "MONGO_URI",
@@ -25,11 +25,15 @@ const allowedEnv = [
   "NODE_ENV",
 ];
 
+// Remove everything else from process.env
 for (const key of Object.keys(process.env)) {
   if (!allowedEnv.includes(key)) {
     delete process.env[key];
   }
 }
+
+// Prevent Render DEBUG_URL from causing path-to-regexp errors
+process.env.DEBUG_URL = undefined;
 
 // ----------------- EXPRESS APP ----------------- //
 const app = express();
@@ -84,13 +88,13 @@ const PORT = process.env.PORT || 3000;
 
 const startServer = async () => {
   try {
-    await connectDB(); // connect to MongoDB first
+    await connectDB(); // Connect to MongoDB first
     app.listen(PORT, () => {
-      console.log(`✅ Server running on port ${PORT}`);
+      console.log(`Server running on port ${PORT}`);
     });
   } catch (err) {
-    console.error("❌ Failed to connect to DB:", err);
-    process.exit(1); // exit if DB connection fails
+    console.error("Failed to connect to DB:", err);
+    process.exit(1); // Exit if DB connection fails
   }
 };
 

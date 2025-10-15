@@ -50,7 +50,7 @@ const isProduction = process.env.NODE_ENV === "production";
 // CORS setup for development only
 if (!isProduction) {
   const corsOptions = {
-    origin: "http://localhost:5173",
+    origin: "https://your-frontend-url.onrender.com",
     credentials: true,
   };
   app.use(cors(corsOptions));

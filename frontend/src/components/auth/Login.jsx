@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
+import { USER_API_END_POINT } from "@/utils/constant";
 import Navbar from "../shared/Navbar";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
@@ -12,8 +12,6 @@ import { Button } from "../ui/button";
 import { useDispatch, useSelector } from "react-redux";
 import { setLoading, setUser } from "@/redux/authSlice";
 import { Loader2 } from "lucide-react";
-
-const USER_API_END_POINT = "http://localhost:8000/api/v1/user";
 
 const Login = () => {
   const { loading, user } = useSelector((store) => store.auth);

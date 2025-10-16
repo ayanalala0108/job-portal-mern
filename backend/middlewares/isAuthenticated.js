@@ -9,8 +9,6 @@ const isAuthenticated = async (req, res, next) => {
         ? req.headers.authorization.split(" ")[1]
         : null);
 
-    console.log("🔍 Token received:", token);
-
     if (!token) {
       return res.status(401).json({
         message: "Authentication token missing",
@@ -20,10 +18,10 @@ const isAuthenticated = async (req, res, next) => {
 
     // ✅ Verify token
     const decoded = jwt.verify(token, process.env.SECRET_KEY);
-    console.log("✅ Decoded JWT:", decoded);
 
-    // ✅ Attach user ID to request
+    // ✅ Attach user ID (and maybe role/email if needed later)
     req.id = decoded.userId;
+    // req.role = decoded.role; // optional if you ever store it in token
 
     next();
   } catch (error) {
@@ -33,7 +31,7 @@ const isAuthenticated = async (req, res, next) => {
       message:
         error.name === "TokenExpiredError"
           ? "Session expired. Please log in again."
-          : "Invalid authentication token",
+          : "Invalid or expired authentication token",
       success: false,
     });
   }

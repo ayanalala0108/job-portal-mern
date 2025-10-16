@@ -26,14 +26,12 @@ const allowedEnv = [
   "NODE_ENV",
 ];
 
-// Remove everything else from process.env
 for (const key of Object.keys(process.env)) {
   if (!allowedEnv.includes(key)) {
     delete process.env[key];
   }
 }
 
-// Prevent Render DEBUG_URL from causing path-to-regexp errors
 process.env.DEBUG_URL = undefined;
 
 // ----------------- EXPRESS APP ----------------- //
@@ -44,17 +42,28 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Determine environment
+// ----------------- ENVIRONMENT ----------------- //
 const isProduction = process.env.NODE_ENV === "production";
 
-// CORS setup for development only
-if (!isProduction) {
-  const corsOptions = {
-    origin: "https://job-portal-mern-qpwd.onrender.com",
-    credentials: true,
-  };
-  app.use(cors(corsOptions));
-}
+// ----------------- CORS SETUP (✅ works for both dev + production) ----------------- //
+const allowedOrigins = [
+  "https://job-portal-mern-qpwd.onrender.com", // frontend (Render)
+  "http://localhost:5173", // local development (Vite default)
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps, Postman)
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true, // allow cookies/auth headers
+  })
+);
 
 // ----------------- API ROUTES ----------------- //
 app.use("/api/v1/user", userRoute);
@@ -74,7 +83,7 @@ const __dirname = path.dirname(__filename);
 if (isProduction) {
   app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
-  // Serve index.html for all unknown routes
+  // Serve index.html for any route not handled by API
   app.get("*", (req, res) =>
     res.sendFile(path.resolve(__dirname, "../frontend/dist", "index.html"))
   );
@@ -89,13 +98,13 @@ const PORT = process.env.PORT || 3000;
 
 const startServer = async () => {
   try {
-    await connectDB(); // Connect to MongoDB first
+    await connectDB();
     app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
+      console.log(`✅ Server running on port ${PORT}`);
     });
   } catch (err) {
-    console.error("Failed to connect to DB:", err);
-    process.exit(1); // Exit if DB connection fails
+    console.error("❌ Failed to connect to DB:", err);
+    process.exit(1);
   }
 };
 
